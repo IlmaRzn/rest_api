@@ -46,11 +46,13 @@ app.post("/api/courses", (req, res) => {
     res.status(400).send(error.errors);
   }
 });
+
+
 app.put("/api/courses/:id", (req, res) => {
   try {
     const course = courses.find((c) => c.id === parseInt(req.params.id));
     if (!course)
-      res.status(404).send("the course eith the given id was not found");
+      res.status(404).send("the course with the given id was not found");
     const courseData = courseSchema.parse(req.body);
     course.name = courseData.name;
     res.send(course);
