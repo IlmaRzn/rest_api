@@ -1,6 +1,8 @@
 import  express  from "express";
 import {z} from "zod"
 import dotenv from "dotenv"
+import database from "./db.js";
+
 
 dotenv.config();
 const app = express();
@@ -30,7 +32,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/courses", (req, res) => {
-  res.send(courses);
+ database.query('SELECT * FROM test', (err, results)=>{
+    if(err) throw err;
+    res.send(results)
+ })
 });
 
 app.post("/api/courses", (req, res) => {
@@ -80,6 +85,5 @@ app.get("/api/courses/:id", (req, res) => {
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}..`));
-
 
 export default app;
