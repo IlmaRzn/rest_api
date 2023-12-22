@@ -9,20 +9,6 @@ const app = express();
 
 app.use(express.json());
 
-const courses = [
-  {
-    id: 1,
-    name: "course1",
-  },
-  {
-    id: 2,
-    name: "course2",
-  },
-  {
-    id: 3,
-    name: "course3",
-  },
-];
 
 const courseSchema = z.object({
   name: z.string().min(3),
