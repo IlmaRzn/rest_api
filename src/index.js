@@ -32,55 +32,91 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/courses", (req, res) => {
- database.query('SELECT * FROM test', (err, results)=>{
-    if(err) throw err;
-    res.send(results)
- })
+ const sql_query = `select * from courses.test`;
+ database.query(sql_query, (err, result) => {
+   if (err) throw err;
+   res.send(result);
+ });
+
 });
 
 app.post("/api/courses", (req, res) => {
-  try {
-    const courseData = courseSchema.parse(req.body);
-    const course = {
-      id: courses.length + 1,
-      name: courseData.name,
-    };
-    courses.push(course);
-    res.send(course);
-  } catch (error) {
-    res.status(400).send(error.errors);
+  try{
+    const  courseData = courseSchema.parse(req.body)
+    const sql_query = 'INSERT INTO courses.test (name) VALUES (?)'
+    database.query(sql_query,[courseData.name],(err, result)=>{
+      if (err) throw err;
+      const insertedCourse ={
+        id: result.insertId,
+        name:courseData.name,
+      };
+      res.send(insertedCourse)
+    })
+  } catch (error){
+    res.status(400).send(error.errors)
   }
 });
 
 
 app.put("/api/courses/:id", (req, res) => {
-  try {
-    const course = courses.find((c) => c.id === parseInt(req.params.id));
-    if (!course)
-      res.status(404).send("the course with the given id was not found");
-    const courseData = courseSchema.parse(req.body);
-    course.name = courseData.name;
-    res.send(course);
-  } catch (error) {
-    res.status(400).send(error.errors);
+try{
+  const courseId = parseInt(req.params.id)
+  const corseData = courseSchema.parse(req.body)
+  const query = 'UPDATE courses.test Set name = ? WHERE idTest = ?';
+  database.query(query,[corseData.name,courseId],(err,result)=>{
+    if (err) {throw err}
+    if (result.affectedRows === 0){
+      res.status(404).send('the course with the given id was not found')
+
+    return     
+    }
+    const updateCourse ={
+    id: courseId,
+    name:corseData.name,
   }
+    res.send(updateCourse)
+  })
+  
+}catch (error){
+  res.status(400).send(error.errors)
+}
 });
 
 app.delete("/api/courses/:id", (req, res) => {
-  const course = courses.find((c) => c.id === parseInt(req.params.id));
-  if (!course)
-    res.status(404).send("the course with the given id was not found");
-
-  const index = courses.indexOf(course);
-  courses.splice(index, 1);
-  res.send(course);
+  const courseId = parseInt(req.params.id)
+  const query = 'DELETE FROM courses.test WHERE idTest =?'
+  database.query(query,[courseId],(err,result)=>{
+    if(err){
+      throw err
+    }
+    if(result.affectedRows === 0){
+      res.status(404).send("the course with the given id was not found");
+      return
+    }
+    const deletedCourse={
+      id: courseId,
+    }
+    res.send(deletedCourse)
+  })
 });
 
 app.get("/api/courses/:id", (req, res) => {
-  const course = courses.find((c) => c.id === parseInt(req.params.id));
-  if (!course)
-    res.status(404).send("the course with the given id was not found");
-  res.send(course);
+  const courseId = parseInt(req.params.id);
+  const query = "SELECT * FROM courses.test WHERE idTest = ?";
+
+  database.query(query, [courseId], (err, results) => {
+    if (err) {
+      
+      throw err;
+    }
+
+    if (results.length === 0) {
+      res.status(404).send("The course with the given id was not found");
+      return;
+    }
+    const course = results[0]; 
+    res.send(course);
+  });
 });
 
 const port = process.env.PORT || 5000;
